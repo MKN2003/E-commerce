@@ -18,7 +18,7 @@ def check_user_db(username, phone_number, email):
     checker_email = db.query(User).filter_by(email=email).first()
     if checker_name:
         return "Такой Username уже занят"
-    elif phone_number:
+    elif checker_phone_number:
         return 'Такой номер телеофона уже занят'
     elif checker_email:
         return "Такой email уже занят"
