@@ -1,7 +1,17 @@
 from fastapi import APIRouter
 from database.userservice import *
+from typing import Optional
+from pydantic import BaseModel
 
 user_router = APIRouter(tags=['Users'], prefix='/users')
+
+
+class UserValidator(BaseModel):
+    username: str
+    phone_number: str
+    email: str
+    address: str
+    hashed_password: str
 
 
 @user_router.get('/all-users')
@@ -18,10 +28,21 @@ async def get_exact_user(id: int):
 
 
 @user_router.post('/api/registration')
-async def user_register(username: str, email: str,  phone_number: str, address: str, hashed_password: str):
-    register_user = user_register_db(username=username, email=email, phone_number=phone_number,
-                                     address=address, hashed_password=hashed_password)
-    return register_user
+async def register_user(validator: UserValidator):
+    db = next(get_db())
+    user_data = validator.dict()
+    user_email = user_data.get('email')
+    print(user_email)
+    checker = db.query(User).filter_by(email=user_email).first()
+    print(f'ошибка {checker}')
+    if not checker:
+        try:
+            reg_user = user_register_db(**user_data)
+            return {'status': 1, "message": reg_user}
+        except Exception as e:
+            return {'status': 0, 'message': str(e)}
+    else:
+        return {'status': 0, 'message': 'Invalid email'}
 
 
 @user_router.post('/api/login')
