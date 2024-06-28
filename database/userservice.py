@@ -63,9 +63,14 @@ def user_update_info_db(id, change_info, new_info):
                 db.commit()
                 return 'Успешно изменено'
             elif change_info == 'email':
-                user.email = new_info
-                db.commit()
-                return 'Успешно изменено'
+                user_filter = db.query(User).filter_by(email=change_info).first()
+
+                if user_filter:
+                    return 'Эта почта уже занята'
+                else:
+                    user.email = new_info
+                    db.commit()
+                    return 'Успешно изменено'
             elif change_info == 'address':
                 user.address = new_info
                 db.commit()
